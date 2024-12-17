@@ -1,0 +1,6 @@
+echo "streamlit" > requirements.txt
+echo "pandas" >> requirements.txt
+echo "yfinance" >> requirements.txt
+echo "matplotlib" >> requirements.txt
+echo "scikit-learn" >> requirements.txt
+echo "tensorflow" >> requirements.txt
