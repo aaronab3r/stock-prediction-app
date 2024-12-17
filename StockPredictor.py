@@ -4,11 +4,12 @@ import yfinance as yf
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.linear_model import LinearRegression
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, LSTM
 from datetime import datetime, timedelta
 
 # Title
-st.title("📈 Stock Prediction with Linear Regression")
+st.title("Stock Prediction WebApp")
 
 # Sidebar inputs
 st.sidebar.header("Input Parameters")
@@ -26,7 +27,7 @@ def load_data(ticker, start_date, end_date):
 try:
     stock_data = load_data(ticker, start_date, end_date)
 
-    # Validate date range
+    # Validate date rangae
     if len(stock_data) < 15:  # Require at least 15 data points
         st.error("Error: Selected date range is too short. Please choose a longer date range (at least 1 month).")
         st.stop()
@@ -41,40 +42,46 @@ try:
     plt.legend()
     st.pyplot(fig)
 
-    # Prepare data for Linear Regression
+    # Prepare data for LSTM
     st.subheader("Prediction Model")
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scaler.fit_transform(stock_data[['Close']])
 
-    # Create dataset
+    # Dynamically adjust time_step based on available data
     time_step = min(10, len(stock_data) - 1)
 
+    # Create dataset
     def create_dataset(data, time_step):
         X, y = [], []
-        for i in range(len(data) - time_step):
+        for i in range(len(data) - time_step - 1):
             X.append(data[i:(i + time_step), 0])
             y.append(data[i + time_step, 0])
         return np.array(X), np.array(y)
 
     X, y = create_dataset(scaled_data, time_step)
+    X = X.reshape(X.shape[0], X.shape[1], 1)
 
-    # Train Linear Regression model
-    model = LinearRegression()
-    model.fit(X, y)
+    # Train LSTM model
+    model = Sequential()
+    model.add(LSTM(50, return_sequences=True, input_shape=(time_step, 1)))
+    model.add(LSTM(50, return_sequences=False))
+    model.add(Dense(1))
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    model.fit(X, y, epochs=20, batch_size=16, verbose=0)
 
     # Make future predictions
     st.subheader("Future Predictions")
     future_days = st.sidebar.slider("Predict next N days", 1, 30, 7)
 
     # Generate future predictions
-    last_data = scaled_data[-time_step:].flatten()
+    last_data = scaled_data[-time_step:]
     future_preds = []
 
     for _ in range(future_days):
-        input_data = last_data.reshape(1, -1)  # Reshape for Linear Regression
-        pred = model.predict(input_data)[0]
+        input_data = last_data.reshape(1, time_step, 1)
+        pred = model.predict(input_data, verbose=0)[0][0]
         future_preds.append(pred)
-        last_data = np.append(last_data[1:], pred)
+        last_data = np.append(last_data[1:], [[pred]], axis=0)
 
     # Rescale predictions back to original values
     future_preds_rescaled = scaler.inverse_transform(np.array(future_preds).reshape(-1, 1))
