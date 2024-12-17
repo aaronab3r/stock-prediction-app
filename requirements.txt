@@ -1,6 +1,6 @@
-echo "streamlit" > requirements.txt
-echo "pandas" >> requirements.txt
-echo "yfinance" >> requirements.txt
-echo "matplotlib" >> requirements.txt
-echo "scikit-learn" >> requirements.txt
-echo "tensorflow" >> requirements.txt
+streamlit==1.30.0
+pandas==2.0.3
+yfinance==0.2.28
+matplotlib==3.7.3
+scikit-learn==1.2.2
+tensorflow==2.12.0
