@@ -2,7 +2,7 @@
 
 This project is a **stock prediction web application** that predicts future stock prices based on historical trends using **LSTM neural networks**. It provides interactive visualizations, user inputs, and real-time stock data retrieval.
 
-🔗 **Access the Live App**: [Stock Prediction App](https://dal8f64loej2l.cloudfront.net/)
+🔗 **Access the Live App**: [Stock Prediction App](https://aaronab3r-stock-predictor.streamlit.app/)
 
 ---
 
